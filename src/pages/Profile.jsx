@@ -1,26 +1,38 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { dummyPostsData, dummyUserData } from '../assets/assets';
-import Loading from '../compoenets/Loading';
-import UserInfo from '../compoenets/UserInfo';
-import PostCard from '../compoenets/PostCard';
+import UserInfo from '../components/UserInfo';
+import PostCard from '../components/PostCard';
 import moment from 'moment';
-import EditProfile from '../compoenets/EditProfile';
+import EditProfile from '../components/EditProfile';
 import { Link } from 'react-router-dom';
+import Loading from '../components/Loading';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '@clerk/clerk-react';
+import { fetchUserProfile } from '../features/discover/discover-slice';
+
 function Profile() {
   const {profileId} = useParams();
   const [user, setUser] = useState(null);
-  const [post, setPost] = useState([]);
+  const [posts, setPosts] = useState([]);
   const [activeTab, setActiveTab] = useState('Posts');
   const [showdata, setShowdata] = useState(false);
-  const fetchUser = async() => {
-    setUser(dummyUserData);
-    setPost(dummyPostsData);
-  }
+  const dispatch = useDispatch();
+  const { getToken } = useAuth();
+  const { status } = useSelector(state => state.discover);
+
   useEffect(() => {
+    const fetchUser = async() => {
+      const token = await getToken();
+      const result = await dispatch(fetchUserProfile({token, profileId})).unwrap();
+      if (result) {
+        setUser(result.user);
+        setPosts(result.posts);
+      }
+    }
     fetchUser()
-  }, [])
-  return user ? (
+  }, [dispatch, getToken, profileId])
+
+  return status === 'loading' ? <Loading /> : user ? (
     <div className='relative h-full overflow-y-scroll bg-gray-50 p-6'>
       <div className='max-w-3xl mx-auto'>
         {/* proifle card */}
@@ -33,7 +45,7 @@ function Profile() {
               />}
           </div>
           {/* user info */}
-          <UserInfo user={user} post={post} profileId={profileId} setShowEdit={setShowdata}/>
+          <UserInfo user={user} post={posts} profileId={profileId} setShowEdit={setShowdata}/>
         </div>
         {/* tabs */}
         <div className='mt-6'>
@@ -52,7 +64,7 @@ function Profile() {
           {/* posts */}
           {activeTab === 'Posts' && (
             <div className='mt-6 flex flex-col items-center gap-6'>
-              {post.map((p) => (
+              {posts.map((p) => (
                 <PostCard key={p._id} post={p}/>
               ))}
             </div>
@@ -60,7 +72,7 @@ function Profile() {
           {/* media */}
           {activeTab === 'Media' && (
             <div className='flex flex-wrap mt-6 max-w-6xl'>
-              {post.filter((p)=>p.image_urls.length > 0).map((post) => (
+              {posts.filter((p)=>p.image_urls.length > 0).map((post) => (
                 <>
                   {post.image_urls.map((image, index) => (
                     <Link target='_blank' to={image} key={index} className='relative group'>
@@ -82,7 +94,7 @@ function Profile() {
   {showdata && <EditProfile user={user} setShowEdit={setShowdata} />}
     </div>
   ) : (
-    <Loading />
+    <p>User not found</p>
   )
 }
 

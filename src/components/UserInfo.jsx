@@ -1,7 +1,6 @@
 import { Calendar, MapPin, PenBox, Verified } from 'lucide-react'
 import moment from 'moment'
-import EditProfile from '../compoenets/EditProfile';
-function UserInfo({user, post, profileId, setShowEdit}) {
+    function UserInfo({user, post, profileId, setShowEdit}) {
   return (
     <div className='relative py-4 px-6 md:px-6 bg-white'>
         <div className='flex flex-col md:flex-row items-start gap-6'>

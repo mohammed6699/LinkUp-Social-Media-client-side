@@ -1,16 +1,7 @@
-import { useEffect, useState } from 'react';
-import { dummyRecentMessagesData } from './../assets/assets';
 import { Link } from 'react-router-dom';
 import moment from 'moment';
 
-function RecentMessages() {
-    const [messages, setMessages] = useState([]);
-    const fetchMesages = async () => {
-        setMessages(dummyRecentMessagesData);
-    }
-    useEffect(() => {
-        fetchMesages();
-    }, [])
+function RecentMessages({ messages }) {
   return (
     <div className='bg-white max-w-xl mt-4 p-4 min-h-20 rounded-md shadow text-slate-500 text-sm'>
         <h1 className='text-slate-500 font-semibold mb-4'>Recent Messages</h1>

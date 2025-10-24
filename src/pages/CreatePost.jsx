@@ -1,17 +1,42 @@
 import React, { useState } from 'react'
-import { dummyUserData } from '../assets/assets';
 import { Image, X } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '@clerk/clerk-react';
+import { createPost } from '../features/posts/post-slice';
+import { useNavigate } from 'react-router-dom';
 
 function CreatePost() {
   const [content, setContent] = useState('');
   const [images, setImages] = useState([]);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
+  const dispatch = useDispatch();
+  const { getToken } = useAuth();
+  const userData = useSelector(state => state.user.value);
+  const navigate = useNavigate();
 
-  const userData = dummyUserData;
   const handleSubmit = async() => {
+    setLoading(true);
+    const token = await getToken();
+    const formData = new FormData();
+    formData.append('content', content);
+    formData.append('post_type', images.length > 0 ? 'text_with_image' : 'text');
+    images.forEach(image => {
+        formData.append('images', image);
+    });
 
+    try {
+        await dispatch(createPost({ token, postData: formData })).unwrap();
+        setContent('');
+        setImages([]);
+        navigate('/');
+    } catch (error) {
+        console.error(error);
+    } finally {
+        setLoading(false);
+    }
   }
+
   return (
     <div className='min-h-screen bg-gradient-to-b from-slate-50 to-white'>
       <div className='max-w-6xl mx-auto p-6'>
@@ -23,10 +48,10 @@ function CreatePost() {
           {/* user info and form */}
           <div className='max-w-xl bg-white p-4 sm:p-8 sm:pb-3 rounded-xl shadow-md space-y-3'>
             <div className='flex items-center gap-3'>
-              <img src={userData.profile_picture} className='w-12 h-12 rounded-full shadow' alt='user profile image'/>
+              <img src={userData?.profile_picture} className='w-12 h-12 rounded-full shadow' alt='user profile image'/>
               <div className='mt-2'>
-                <h2 className='font-semibold'>{userData.full_name}</h2>
-                <p className='text-sm text-gray-600'>@{userData.username}</p>
+                <h2 className='font-semibold'>{userData?.full_name}</h2>
+                <p className='text-sm text-gray-600'>@{userData?.username}</p>
               </div>
             </div>
             {/* text area */}

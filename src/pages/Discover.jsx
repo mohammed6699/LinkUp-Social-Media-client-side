@@ -1,24 +1,32 @@
-import React, { useState } from 'react'
-import { dummyConnectionsData } from '../assets/assets';
+import React, { useState, useEffect } from 'react'
 import { Search } from 'lucide-react';
-import UserCard from '../compoenets/UserCard';
-import Loading from './../compoenets/Loading';
+import Loading from '../components/Loading';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '@clerk/clerk-react';
+import { fetchUsers } from '../features/discover/discover-slice';
+import UserCard from '../components/UserCard';
 
 function Discover() {
   const [input, setInput] = useState('');
-  const [user, setUsers] = useState(dummyConnectionsData);
-  const [loading, setLoading] = useState(false)
+  const dispatch = useDispatch();
+  const { getToken } = useAuth();
+  const { users, status } = useSelector((state) => state.discover);
 
   const handleSearch = async(e) => {
     if(e.key === 'Enter'){
-      setUsers([]);
-      setLoading(true)
-      setTimeout(() => {
-        setUsers(dummyConnectionsData)
-        setLoading(false)
-      }, 1000);
+      const token = await getToken();
+      dispatch(fetchUsers({token, input}));
     }
   }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const token = await getToken();
+      dispatch(fetchUsers({token}));
+    };
+    fetchData();
+  }, [dispatch, getToken]);
+
   return (
     <div className='min-h-screen bg-gradient-to-b from-slate-50 to-white'>
       <div className='max-w-6xl mx-auto p-6'>
@@ -42,17 +50,17 @@ function Discover() {
               </div>
             </div>
         </div>
-        <div className='flex flex-wrap gap-6'>
-          {user.map((user) => (
-            <UserCard user={user} 
-            key={user._id}/>
-          ))}
-        </div>
-        {
-          loading && (
-            <Loading />
-          )
-        }
+        {status === 'loading' ? <Loading /> : (
+          <div className='flex flex-wrap gap-6'>
+            {users.map((user) => (
+              <UserCard user={user} 
+              key={user._id}/>
+            ))}
+          </div>
+        )}
+        {status !== 'loading' && users.length === 0 && (
+          <p>No users found.</p>
+        )}
       </div>
     </div>
   )

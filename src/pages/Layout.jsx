@@ -1,16 +1,16 @@
 import React, { useState } from 'react'
-import Sidebar from '../compoenets/SideBar'
 import { Outlet } from 'react-router-dom'
 import { Menu, X } from 'lucide-react'
 import { dummyUserData } from '../assets/assets'
-import Loading from '../compoenets/Loading'
+import SideBar from '../components/SideBar';
+import Loading from '../components/Loading';
 function Layout() {
   const [sideBar, setSideBar] = useState(false)
   const user = dummyUserData
   return user ? (
       <div className='flex w-full h-screen'>
         
-        <Sidebar 
+        <SideBar 
           sideBar={sideBar} 
           setSideBar={setSideBar}
         />

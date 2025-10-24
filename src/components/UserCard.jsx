@@ -1,15 +1,34 @@
 import React from 'react'
-import { dummyUserData } from '../assets/assets'
 import { MapPin, MessageCircle, Plus, UserPlus } from 'lucide-react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useAuth } from '@clerk/clerk-react';
+import { followUser, unfollowUser, sendConnectionRequest } from '../features/user/user-slice';
+import { useNavigate } from 'react-router-dom';
 
 function UserCard({user}) {
-    const currentUser = dummyUserData;
+    const dispatch = useDispatch();
+    const { getToken } = useAuth();
+    const currentUser = useSelector(state => state.user.value);
+    const navigate = useNavigate();
+
     const handleFollow = async() => {
-
+        const token = await getToken();
+        if (currentUser?.following.includes(user._id)) {
+            dispatch(unfollowUser({ token, id: user._id }));
+        } else {
+            dispatch(followUser({ token, id: user._id }));
+        }
     }
+
     const handleConnectionRequest = async() => {
-
+        if (currentUser?.connections.includes(user._id)) {
+            navigate(`/messages/${user._id}`);
+        } else {
+            const token = await getToken();
+            dispatch(sendConnectionRequest({ token, id: user._id }));
+        }
     }
+
   return (
     <div 
     key={user._id}
@@ -18,7 +37,7 @@ function UserCard({user}) {
             <img src={user.profile_picture} alt='' 
             className='rounded-full w-16 shadow-md mx-auto'
             />
-            <p className='mt-4 font-semibold'>{user.fullname}</p>
+            <p className='mt-4 font-semibold'>{user.full_name}</p>
             {user.username && <p className='text-gray-500 font-light'>@{user.username}</p>}
             {user.bio && <p className='text-gray-600 mt-2 text-center text-sm px-4'>{user.bio}</p>}
         </div>
@@ -34,7 +53,6 @@ function UserCard({user}) {
             {/* follow button */}
             <button
             onClick={handleFollow}
-            disabled={currentUser?.following.includes(user._id)}
             className='w-full py-2 flex justify-center items-center gap-2 border rounded-md bg-gradient-to-r from-indigo-500 to-purple-600
             hover:from-indigo-600 hover:to-purple-700 active:scale-95 text-white transition-all cursor-pointer'>
                 <UserPlus className='w-4 h-4'/>{currentUser?.following.includes(user._id) ? 'Following': "Follow"}

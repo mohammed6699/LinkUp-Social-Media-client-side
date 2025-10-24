@@ -16,7 +16,10 @@ function SideBar({sideBar, setSideBar}) {
      max-sm:absolute top-0 bottom-0 z-20 ${sideBar ? 'translate-x-0' : 'max-sm:-translate-x-full'} transition-all
      duration-300 ease-in-out`}>
         <div className='w-full'>
-          <img onClick={() => navigate('/')} src={assets.logo} alt='logo image' className='w-26 ml-10 my-2 cursor-pointer' />
+          <div className='flex justify-between items-center mr-10'>
+            <img onClick={() => navigate('/')} src={assets.logo} alt='logo image' className='w-26 ml-10 my-2 cursor-pointer' />
+            <h1>LinkUp</h1>
+          </div>
           <hr className='mb-8 border-gray-300'/>
           <MenuItems setSideBar={setSideBar}/>
           <Link to='/create-post' className='m-6 px-4 py-2 bg-indigo-500 text-white rounded-full flex items-center justify-center gap-2 cursor-pointer hover:bg-indigo-700'>

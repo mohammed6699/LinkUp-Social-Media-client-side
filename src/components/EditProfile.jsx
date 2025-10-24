@@ -1,22 +1,27 @@
 import React, { useState } from 'react';
-import { dummyUserData } from '../assets/assets';
+import { useDispatch } from 'react-redux';
+import { useAuth } from '@clerk/clerk-react';
+import { updateUser } from '../features/user/user-slice';
 import { X } from 'lucide-react';
 
-function EditProfile({ user = dummyUserData, setShowEdit }) {
+function EditProfile({ user, setShowEdit }) {
   const [form, setForm] = useState({
     full_name: user.full_name,
     username: user.username,
     bio: user.bio,
     location: user.location,
   });
+  const dispatch = useDispatch();
+  const { getToken } = useAuth();
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would send the updated data to your backend
+    const token = await getToken();
+    await dispatch(updateUser({ userdata: form, token }));
     setShowEdit(false);
   };
 
